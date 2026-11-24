@@ -1,6 +1,10 @@
 # Pingala Meter-Constrained Poetry
 
-This project measures whether checking Sanskrit metre at word boundaries helps a language model find lines with a basic anuṣṭubh cadence. Both decoders used the same fine-tuned DistilGPT-2 checkpoint and a cap of 4,096 sampled tokens per prompt.
+Can a language model find more Sanskrit lines that scan correctly if it checks metre before a line is complete? We tested this on 64 held-out prompts using the same DistilGPT-2 checkpoint and a cap of 4,096 sampled tokens per prompt.
+
+[Research paper (PDF)](paper/vimarsini_revised.pdf) · [Presentation (PowerPoint)](paper/Pingala_Metre_Research.pptx) · [Benchmark results](results/guided_reader_review/automatic_summary.json)
+
+## What the experiment found
 
 | Result on 64 held-out prompts | Generate and filter | Metre guided |
 |---|---:|---:|
@@ -8,7 +12,15 @@ This project measures whether checking Sanskrit metre at word boundaries helps a
 | Total sampled tokens | 193,856 | 159,580 |
 | Median sampled tokens on 21 shared successes | 1,952 | 589 |
 
-A blinded LLM review scored both sets of generated lines low for grammar and meaning. A separate phoneme-based scanner agreed with chandas on 36 selected lines. Read the [paper](paper/vimarsini_revised.pdf) for limits on what these results show.
+Guidance found cadence matches on 11 more prompts. The paired exact test gave `p = 0.052`. Token counts measure sampling cost and do not measure elapsed time. A blinded LLM review gave both sets low grammar and meaning scores. A phoneme-based scanner agreed with chandas on the 36 reviewed lines. The study collected no human ratings.
+
+## How metre guidance works
+
+1. Both decoders sample continuations from the fine-tuned model.
+2. At a word boundary, the guided decoder scans the prefix and drops it if its settled syllables violate the target cadence. The last two syllables remain provisional.
+3. Both methods accept a complete line only when it passes the basic 16-syllable anuṣṭubh check and is absent from the normalized corpus. A prompt can exhaust its budget without a match.
+
+The [guided decoder](src/guided_study.py) contains the paired experiment. The smaller [Prastāra demo](src/demo.py) illustrates exact light/heavy pattern filtering using a fixed phrase list.
 
 ## Repository contents
 
@@ -18,18 +30,19 @@ A blinded LLM review scored both sets of generated lines low for grammar and mea
 
 The public checkout includes research code, aggregate results, and publication files. Download input datasets separately. Trained weights, raw review sheets, and local environments stay outside Git.
 
-## Run the tests
+## Try the phrase demo and run tests
 
 From the repository root, run the following commands with Python 3.11.
 
 ```powershell
 python -m venv .venv
+.venv/Scripts/python.exe -m src.demo
 .venv/Scripts/python.exe -m unittest discover -s tests -v
 ```
 
 ## Re-run the Sanskrit experiment
 
-Use a CUDA-capable PyTorch installation. Install the remaining packages from `requirements.txt`. Download the pinned Chandomitra splits listed in [data/README.md](data/README.md).
+Install a CUDA-enabled PyTorch build, then install the remaining packages from `requirements.txt`. Download the pinned Chandomitra splits listed in [data/README.md](data/README.md).
 
 ```powershell
 $env:PINGALA_VERSE_SPLIT = 'chandomitra'
