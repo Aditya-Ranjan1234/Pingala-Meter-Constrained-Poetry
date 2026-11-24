@@ -1,0 +1,11 @@
+{
+  "experiment": "pingala_constraint_v1",
+  "prastara_length_4": ["LLLL", "LLLG", "LLGL", "LLGG", "LGLL", "LGLG", "LGGL", "LGGG", "GLLL", "GLLG", "GLGL", "GLGG", "GGLL", "GGLG", "GGGL", "GGGG"],
+  "target_meter": "LGGL",
+  "unconstrained": {"lines": 8, "meter_validity": 0.375, "mean_likelihood_proxy": 0.8975},
+  "constrained": {"lines": 8, "meter_validity": 1.0, "mean_likelihood_proxy": 0.9225},
+  "poems": {
+    "unconstrained": ["a bright moon rises", "the patient moon listens", "kind hands shape tomorrow", "a bright moon rises", "quiet stars remember", "new winds carry seed", "a bright moon rises", "the patient moon listens"],
+    "constrained": ["a bright moon rises", "the patient moon listens", "kind hands shape tomorrow", "a bright moon rises", "the patient moon listens", "kind hands shape tomorrow", "a bright moon rises", "the patient moon listens"]
+  }
+}

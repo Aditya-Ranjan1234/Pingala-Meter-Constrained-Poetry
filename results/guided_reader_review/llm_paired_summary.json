@@ -1,0 +1,67 @@
+{
+  "judge": "Codex LLM",
+  "prompt_count": 12,
+  "identical_baseline_guided_lines": 1,
+  "exploratory_llm_scansion": {
+    "baseline": {
+      "checked": 1,
+      "exact_agreement": 1
+    },
+    "guided": {
+      "checked": 3,
+      "exact_agreement": 3
+    },
+    "reference": {
+      "checked": 4,
+      "exact_agreement": 4
+    }
+  },
+  "grammar": {
+    "mean_by_method": {
+      "baseline": 1.75,
+      "guided": 1.5833333333333333,
+      "reference": 4.916666666666667
+    },
+    "guided_minus_baseline": [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      -1,
+      -1,
+      0,
+      -1,
+      0,
+      0
+    ],
+    "guided_higher": 1,
+    "tied": 8,
+    "baseline_higher": 3
+  },
+  "meaning": {
+    "mean_by_method": {
+      "baseline": 1.8333333333333333,
+      "guided": 1.5833333333333333,
+      "reference": 4.5
+    },
+    "guided_minus_baseline": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      -1,
+      -1,
+      0,
+      -1,
+      0,
+      0
+    ],
+    "guided_higher": 0,
+    "tied": 9,
+    "baseline_higher": 3
+  }
+}

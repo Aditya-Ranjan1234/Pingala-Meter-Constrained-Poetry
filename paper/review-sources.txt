@@ -1,0 +1,24 @@
+Sanskrit prosody and language models
+Terdalkar & Bhattacharya|2023|Chandojnanam|Chandojnanam: A Sanskrit Meter Identification and Utilization System|WSC|2023.wsc-csdh.8|Exact and approximate meter identification with scansion.
+Neill|2023|Skrutable|Skrutable: Another Step Toward Effective Sanskrit Meter Identification|WSC|2023.wsc-csdh.7|Scansion and pāda resegmentation for independent checks.
+Chaudhari et al.|2024|SansGPT|SansGPT: Advancing Generative Pre-Training in Sanskrit|ICON|2024.icon-1.50|Sanskrit pretraining gives a language-specific model baseline.
+Sandhan et al.|2025|Śikṣāṣṭaka case study|Aesthetics of Sanskrit Poetry from the Perspective of Computational Linguistics: A Case Study Analysis on Śikṣāṣṭaka|WSC|2025.wsc-csdh.2|Computational analysis of Sanskrit poetic aesthetics.
+De Luca|2025|Accessible Sanskrit|Accessible Sanskrit: A Cascading System for Text Analysis and Dictionary Access|ALP|2025.alp-1.5|Pipeline for Sanskrit linguistic analysis and dictionary access.
+Jagadeeshan et al.|2026|Chandomitra|Chandomitra: Towards Generating Structured Sanskrit Poetry from Natural Language Inputs|EACL|2026.eacl-long.24|English-to-Sanskrit verse with anuṣṭubh control and human ratings.
+Jagadeeshan et al.|2026|Pingala|Pingala: Prosody-Aware Decoding for Sanskrit Poetry Generation|Findings of AACL|2026.findings-aacl.132|Direct prior art on prosody-aware decoding and phonemic encoding.
+Poetry generation and evaluation
+Ormazabal et al.|2022|PoeLM|PoeLM: A Meter- and Rhyme-Controllable Language Model for Unsupervised Poetry Generation|Findings of EMNLP|2022.findings-emnlp.268|Metrical and rhyme control codes from ordinary text.
+Belouadi & Eger|2023|ByGPT5|ByGPT5: End-to-End Style-conditioned Poetry Generation with Token-free Language Models|ACL|2023.acl-long.406|Byte-level model conditions on meter, rhyme and alliteration.
+Mareček et al.|2025|Evaluation of Generated Poetry|Evaluation of Generated Poetry|Eval4NLP|2025.eval4nlp-1.9|Separates meter and rhyme from syntax and semantics.
+Abbas et al.|2026|Shaer|Shaer: Controlled Arabic Poetry Generation with Meter Subform and Semantic Conditioning|ArabicNLP|2026.arabicnlp-main.14|Joint control of meaning, meter subform and length.
+Su et al.|2022|SimCTG / contrastive search|A Contrastive Framework for Neural Text Generation|NeurIPS|https://proceedings.neurips.cc/paper_files/paper/2022/hash/871cae8f599cb8bbfcb0f58fe1af95ad-Abstract-Conference.html|Context similarity penalty addresses repetition.
+Li et al.|2023|Contrastive Decoding|Contrastive Decoding: Open-ended Text Generation as Optimization|ACL|2023.acl-long.687|Expert and amateur models define a contrastive objective.
+Chang et al.|2024|Contrastive extrapolation|Explaining and Improving Contrastive Decoding by Extrapolating the Probabilities of a Huge and Hypothetical LM|EMNLP|2024.emnlp-main.484|Extrapolates token probabilities across model sizes.
+Methods for constrained decoding
+Yang & Klein|2021|FUDGE|FUDGE: Controlled Text Generation With Future Discriminators|NAACL|2021.naacl-main.276|Scores prefixes using predicted future constraint satisfaction.
+Lu et al.|2022|NeuroLogic A*esque|NeuroLogic A*esque Decoding: Constrained Text Generation with Lookahead Heuristics|NAACL|2022.naacl-main.57|Uses lookahead to find paths satisfying lexical constraints.
+Geng et al.|2023|Grammar-Constrained Decoding|Grammar-Constrained Decoding for Structured NLP Tasks without Finetuning|EMNLP|2023.emnlp-main.674|Uses input-dependent grammars to constrain generation.
+Beurer-Kellner et al.|2024|DOMINO|Guiding LLMs The Right Way: Fast, Non-Invasive Constrained Generation|ICML|https://proceedings.mlr.press/v235/beurer-kellner24a.html|Aligns grammar constraints with subword tokenization.
+Tuccio et al.|2025|GRAMMAR-LLM|GRAMMAR-LLM: Grammar-Constrained Natural Language Generation|Findings of ACL|2025.findings-acl.177|Integrates LL(prefix) grammars into token selection.
+Raspanti et al.|2025|Grammar-constrained logical parsing|Grammar-Constrained Decoding Makes Large Language Models Better Logical Parsers|ACL Industry|2025.acl-industry.34|Tests grammar-constrained decoding for logical forms.
+Schall & de Melo|2025|The Hidden Cost of Structure|The Hidden Cost of Structure: How Constrained Decoding Affects Language Model Performance|RANLP|2025.ranlp-1.124|Tracks quality and confidence costs of rigid output constraints.

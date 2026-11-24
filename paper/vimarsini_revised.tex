@@ -1,0 +1,143 @@
+\documentclass[11pt]{article}
+\usepackage[textwidth=4.3in,textheight=7.3in]{geometry}
+\usepackage{fontspec,amsmath,booktabs,tabularx}
+\usepackage[hidelinks]{hyperref}
+\setmainfont{Times New Roman}
+\newfontfamily\dev[Script=Devanagari]{Nirmala UI}
+% Editorial encodings: r = IAST Unicode, s = Unicode Devanagari.
+\newcommand{\rtext}[1]{#1}
+\newcommand{\stext}[1]{{\dev #1}}
+\newcommand{\stepbox}[1]{\fbox{\parbox[c][9mm][c]{31mm}{\centering\small #1}}}
+\newcommand{\downstep}{\\[-.1em] $\downarrow$ \\[-.1em]}
+\setlength{\emergencystretch}{2em}
+\title{\rtext{Prastāra} and metrical control in Sanskrit text generation}
+\author{Aditya Ranjan \and Gnanendra Naidu N \and Nischitha S K}
+\date{}
+\begin{document}
+\maketitle
+\begin{center}
+\small RV College of Engineering, Bengaluru\\
+Nischitha S K, Assistant Professor\\
+\href{mailto:nischithask@rvce.edu.in}{\texttt{nischithask@rvce.edu.in}}
+\end{center}
+\begin{abstract}
+We investigate whether checking Sanskrit metre during generation improves coverage and reduces sampling cost. Building on computational Sanskrit scansion and prior metre-guided generation, we test word-boundary pruning against generate-and-filter under a shared token cap. A DistilGPT-2 checkpoint fine-tuned on 15,433 Sanskrit lines generates continuations for 64 held-out prompts. Under an equal cap of 4,096 sampled tokens per prompt, guidance finds a basic \rtext{anuṣṭubh} cadence match for 40 prompts, compared with 29 for generate-and-filter. Across the 21 prompts solved by both methods, median token use is 589 with guidance and 1,952 with filtering. A single language model evaluates grammar and meaning for 36 shuffled lines, including references and matched outputs from both methods. It assigns low scores to both sets of generated outputs. These results separate metre coverage and sampled-token cost from linguistic quality. The automated scansion is shared by selection and evaluation, and human validation remains open.
+\end{abstract}
+\noindent\textbf{Keywords.} Sanskrit prosody, \rtext{prastāra}, scansion, constrained decoding, contrastive search
+
+\section{Research question}
+Sanskrit verse production requires metrical form as well as grammatical and meaningful language. The project asks which guarantees follow from explicitly representing syllable weights, and which still require a language model or an external evaluator. We distinguish binary enumeration, recognition of a named meter, and generation of original verse. The pilot addresses enumeration and a scanner-defined pattern test.
+
+\section{Related work}
+\paragraph{Sanskrit scansion and generation.}
+Terdalkar and Bhattacharya (2023) and Neill (2023) provide independent tools for scansion and meter identification, including approximate matching and boundary handling. SansGPT supplies a Sanskrit pretraining baseline (Chaudhari et al. 2024), and De Luca (2025) illustrates how Sanskrit text analysis can be organized as a cascade. The aesthetic analysis of the \rtext{\textit{Śikṣāṣṭaka}} by Sandhan et al. (2025) motivates evaluation beyond syllable weights. Chandomitra uses natural-language input to generate structured Sanskrit verse and reports human judgments. The subsequent Pingala paper studies prosody-aware token selection and phonemic encoding (Jagadeeshan et al. 2026a, 2026b). These are direct precedents. Our contribution is a small, inspectable pilot and an audit of its outputs.
+
+\paragraph{Poetic control and text quality.}
+PoeLM obtains training signals for meter and rhyme from ordinary text (Ormazabal et al. 2022). ByGPT5 learns formal styles with byte-level modeling (Belouadi and Eger 2023). Shaer jointly conditions on semantic intent, metrical subform and length for Arabic verse (Abbas et al. 2026). Mareček et al. (2025) evaluate form and semantics as separate dimensions. Su et al. (2022) propose a single-model contrastive search penalty. Li et al. (2023) and Chang et al. (2024) use differences between model distributions. These are distinct families of methods. Our contrastive baseline uses a custom single-model heuristic.
+
+\paragraph{Constraint enforcement.}
+FUDGE predicts attributes from partial sequences (Yang and Klein 2021). NeuroLogic A*esque uses lookahead to guide search toward feasible lexical completions (Lu et al. 2022). Geng et al. (2023), Tuccio et al. (2025), and Raspanti et al. (2025) apply grammar checks within decoding for structured tasks. DOMINO addresses the mismatch between grammar terminals and subword units (Beurer-Kellner et al. 2024). Schall and de Melo (2025) study how rigid constraints change generation quality. Applying these ideas to verse requires a phonological state that can carry an unfinished syllable across token boundaries.
+
+\section{Representation and implementation}
+Let \(L\) denote light weight and \(G\) heavy weight. For length \(n\), the project's \rtext{prastāra} implementation lists the elements of \(\{L,G\}^n\). The implementation is a modern Cartesian-product enumeration with a fixed ordering. At length five, it yields \(2^5=32\) strings. The diagnostic target \(LGGLG\) has a weight sum of eight under \(w(L)=1\) and \(w(G)=2\). A binary string alone leaves out additional conditions of named meters, including verse structure and context-dependent alternatives.
+
+The scanner groups Devanāgarī text into orthographic units and checks vowel signs, nasalization or visarga, and consonant closure heuristics. Its grouping can merge several pronounced syllables that carry implicit vowels. The results below therefore report scanner output as a software observation.
+
+\begin{figure}[ht]
+\centering
+\begin{tabular}{cc}
+\textbf{Neural path} & \textbf{Corpus path}\\[2pt]
+\stepbox{186 training lines} & \stepbox{Corpus segments}\\
+$\downarrow$ & $\downarrow$\\
+\stepbox{DistilGPT-2 fine-tuning} & \stepbox{Devanāgarī scanner}\\
+$\downarrow$ & $\downarrow$\\
+\stepbox{Nucleus or local contrastive search} & \stepbox{Compare with target LGGLG}\\
+$\downarrow$ & $\downarrow$\\
+\stepbox{Prompt continuations} & \stepbox{Retrieved matches}
+\end{tabular}
+\caption{Implemented Sanskrit experiment. The corpus filter and neural decoders run independently. The enumeration utility defines the pattern space. The Sanskrit script sets its target directly.}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\begin{tabular}{c}
+\stepbox{Read a corpus segment}
+\downstep
+\stepbox{Scan into L and G}
+\downstep
+\stepbox{Pattern equals target?}\\[4pt]
+\begin{tabular}{cc}
+$\swarrow$ Yes & No $\searrow$\\
+\stepbox{Retain, deduplicate} & \stepbox{Skip segment}
+\end{tabular}
+\end{tabular}
+\caption{Decision flow in the corpus filter. The code scans the full segment, then deduplicates the retained strings.}
+\end{figure}
+
+\section{Experimental setup}
+The data preparation script extracted 186 nonempty text lines from 50 verse examples in the Sanskrit Metrical Poetry dataset. The training run fine-tuned DistilGPT-2 for three epochs using PyTorch with CUDA on an NVIDIA RTX 4060 Laptop GPU. The saved generation run used the prompt \stext{धर्मः}. Nucleus sampling used \(p=0.9\) and temperature 0.8. The custom contrastive loop considered the top four token logits and applied a cosine penalty with coefficient 0.6 using input embeddings and preceding contextual states. Both paths allowed up to 80 new tokens. The filter scanned the corpus for \(LGGLG\), kept matching strings and removed duplicates. The symbolic phrase demonstration belongs to a separate experiment.
+
+\section{Results}
+\begin{table}[ht]
+\small
+\begin{tabularx}{\linewidth}{@{}lXr@{}}
+\toprule
+Path & Scanner pattern & Target matches\\
+\midrule
+Nucleus sampling & \texttt{GGGGGGGGGG} & 0/1\\
+Local contrastive search & \texttt{GGGGGGGG} & 0/1\\
+Corpus retrieval & \texttt{LGGLG} for both & 2/2\\
+\bottomrule
+\end{tabularx}
+\caption{Recomputed scanner outputs for the saved samples. The retrieval denominator includes returned segments selected by the same scanner.}
+\end{table}
+Both neural samples repeat \stext{कर्मः}. The nucleus sample also ends in a Unicode replacement character. The corpus extraction returned the following strings:
+\begin{quote}
+\stext{तदात्मानं सृजाम्यहम्}\\
+\stext{सकलभुवनवन्द्यं सर्वलोकैकनाथम्}
+\end{quote}
+These are copied corpus segments. The five scanner units per segment are orthographic groups from this implementation. An independent syllable-level analysis is required before giving the segments a metrical label. The single continuation per neural condition supports only a qualitative observation about this run. The measured retrieval match count reflects the filtering rule and gives no estimate of a neural decoder's success rate.
+
+\section{Equal-budget generation study}
+We fine-tuned DistilGPT-2 for three epochs on 15,433 Sanskrit lines from Chandomitra (Jagadeeshan et al.\ 2026a), with 996 validation and 2,836 test lines after split-level overlap removal. The matched experiment used 64 test prompts excluded from earlier development. Each method sampled from the same checkpoint and could spend up to 4,096 sampled tokens per prompt. Both checked complete word boundaries for a 16-syllable half-verse with \texttt{LGG} and \texttt{LGL} at positions 5--7 and 13--15. Guidance additionally pruned incompatible partial lines, keeping the last two syllables provisional. Both methods excluded normalized exact corpus copies.
+
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}Xrr@{}}
+\toprule
+Measure & Filter & Guided\\
+\midrule
+Prompts with a cadence match & 29/64 & 40/64\\
+Total sampled tokens & 193,856 & 159,580\\
+Median tokens on 21 jointly solved prompts & 1,952 & 589\\
+\bottomrule
+\end{tabularx}
+\end{center}
+Guidance alone solved 19 prompts and filtering alone solved eight (two-sided exact paired \(p=0.052\)). The cost measure counts sampled tokens, including failures, and does not measure wall-clock time. The pruning rule rejected none of 207 known reference word boundaries under the same scanner. Of the selected lines, two baseline outputs and no guided outputs matched the full reference pattern. Selection targeted basic cadence in both conditions.
+
+\section{Blinded LLM quality review}
+We sampled 12 jointly solved prompts and shuffled their 36 lines: one reference, one filtered output, and one guided output per prompt. A single Codex language model scored grammar and meaning from 1 to 5 without per-item method labels. Aggregate results from the initial 16-item pilot were inspected before the remaining items were rated. The judge abstained from independently scanning metre.
+
+\begin{center}
+\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Source & Lines & Grammar & Meaning\\
+\midrule
+Reference & 12 & 4.92 & 4.50\\
+Generate and filter & 12 & 1.75 & 1.83\\
+Metre guided & 12 & 1.58 & 1.58\\
+\bottomrule
+\end{tabular}
+\end{center}
+Both generated groups scored low despite passing the basic cadence check. At the prompt level, the guided output received a higher grammar score on one of 12 prompts, tied on eight, and received a lower score on three. For meaning, nine scores tied and three favored the baseline. The methods returned identical text for one prompt. These descriptive judgments from one LLM on a small subset of jointly solved prompts do not establish a quality difference between decoders.
+
+In a separate exploratory scansion spot-check, the LLM recorded syllable boundaries and weights before comparison with \texttt{chandas}. All eight weight sequences matched exactly, including four references, one baseline output, and three guided outputs. A second implementation transliterated all 36 lines to SLP1 and classified vowel nuclei by length, following consonant clusters, and syllable closure. Its weight sequences matched \texttt{chandas} on all 36 lines. Both implementations use similar phonological rules, and the generated lines had already passed \texttt{chandas}, so this tests implementation agreement on the selected sample. Human judgments were not collected.
+
+\section{Conclusion}
+Word-boundary guidance increased automated cadence coverage and reduced sampled-token use on a fresh set of prompts under a shared budget. Low grammar and meaning ratings show that linguistic quality remains a separate bottleneck. Code, benchmark traces and item-level LLM ratings are stored alongside the manuscript.
+\section*{AI use disclosure}
+Codex assisted with implementation, analysis, and manuscript preparation. A single Codex language model supplied the blinded grammar and meaning ratings and the exploratory scansion spot-check. No human ratings were collected.
+
+\input{review-references.tex}
+\end{document}

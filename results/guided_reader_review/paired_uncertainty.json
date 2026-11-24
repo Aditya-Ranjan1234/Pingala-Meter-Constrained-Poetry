@@ -1,0 +1,49 @@
+{
+  "prompts": 64,
+  "resamples": 20000,
+  "seed": 922,
+  "selected_outputs_with_exact_reference_pattern": {
+    "baseline": 2,
+    "guided": 0
+  },
+  "coverage_by_observed_token_threshold": {
+    "512": {
+      "baseline": 2,
+      "guided": 3
+    },
+    "1024": {
+      "baseline": 9,
+      "guided": 17
+    },
+    "1536": {
+      "baseline": 11,
+      "guided": 22
+    },
+    "2048": {
+      "baseline": 17,
+      "guided": 27
+    },
+    "3072": {
+      "baseline": 26,
+      "guided": 36
+    },
+    "4096": {
+      "baseline": 29,
+      "guided": 40
+    }
+  },
+  "coverage_difference": {
+    "estimate": 0.171875,
+    "paired_percentile_95": [
+      0.015625,
+      0.328125
+    ]
+  },
+  "sampled_tokens_saved_per_prompt": {
+    "estimate": 535.5625,
+    "paired_percentile_95": [
+      95.203125,
+      968.03125
+    ]
+  }
+}

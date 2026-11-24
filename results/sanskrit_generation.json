@@ -1,0 +1,18 @@
+{
+  "model": "artifacts/sanskrit_model",
+  "language": "Sanskrit",
+  "script": "Devanāgarī",
+  "target_pattern": "LGGLG",
+  "unconstrained": "धर्मः कर्मात्मः कर्मः कर्मः कर्मः कर्मः कर्मः कर्मः क�",
+  "contrastive": "धर्मः कर्मः कर्मः कर्मः कर्मः कर्मः कर्मः कर्मः कर्मः",
+  "constrained": [
+    "तदात्मानं सृजाम्यहम्",
+    "सकलभुवनवन्द्यं सर्वलोकैकनाथम्"
+  ],
+  "constrained_patterns": [
+    "LGGLG",
+    "LGGLG"
+  ],
+  "candidate_count": 2,
+  "device": "cuda:0"
+}

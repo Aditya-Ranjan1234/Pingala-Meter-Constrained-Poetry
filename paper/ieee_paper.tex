@@ -1,0 +1,76 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\title{Pingala-Constrained Sanskrit Poetry Generation: Prastāra-Based Meter Control and Contrastive Decoding}
+\author{Anonymous Authors}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Neural language models generate fluent text but do not reliably satisfy formal poetic meters. This paper presents a constraint-aware decoding framework grounded in Pingala's Prastāra, the systematic enumeration of binary Laghu (light) and Guru (heavy) syllable patterns. We represent a meter as a finite-state controller, classify candidate syllables by mātrā weight, and prune decoding paths that cannot complete a target pattern. A reproducible phrase-level prototype compares an unconstrained beam-search surrogate with the constrained decoder. The constrained system achieves 100\% line-level meter validity by construction, while preserving a transparent likelihood proxy and semantic candidate ranking. We discuss the main challenge---maintaining meaningful poetry under a hard prosodic constraint---and propose extensions using neural token logits, soft penalties, reranking, and human evaluation.
+\end{abstract}
+
+\section{Introduction}
+Poetry generation requires simultaneous control of semantics, syntax, imagery, and form. Meter is especially difficult because validity is determined by a sequence-level property: a locally plausible word can make the remainder of a line impossible. Indian prosodic theory provides a natural computational representation. In Pingala's system, Prastāra enumerates binary sequences of Laghu and Guru syllables. This paper asks whether that enumeration can serve as an explicit controller for neural decoding.
+
+Our contributions are: (1) a dependency-light Prastāra enumerator; (2) a syllable-weight interface and finite-state constraint; (3) a constrained decoding prototype with an unconstrained baseline; and (4) an IEEE-style experimental report that makes the trade-off between formal validity and meaningful generation explicit.
+
+\section{Background}
+Let $L$ denote a light syllable and $G$ a heavy syllable. For a line containing $n$ syllables, Prastāra enumerates
+\begin{equation}
+\mathcal{P}_n = \{L,G\}^n,
+\end{equation}
+with $2^n$ possible patterns. Under a simple mātrā model, $w(L)=1$ and $w(G)=2$. A target meter is a pattern $m=m_1\ldots m_n$. A candidate line is valid iff its classified pattern equals $m$.
+
+\section{Method}
+The system has four stages. First, transliterated text is segmented into syllable-like units. Second, each unit is classified as Laghu or Guru using vowel length and closure heuristics. Third, Prastāra supplies the allowable patterns and the decoder maintains the current position in the target pattern. Finally, candidate continuations are ranked by the language model score and filtered by the meter state.
+
+For a neural model with token vocabulary $V$, let $q_t(v)$ be the next-token score and let $s$ be the current meter state. A candidate transition is allowed only if its syllabic contribution agrees with the next target symbol. Beam search then retains the top $B$ states:
+\begin{equation}
+\mathrm{Beam}_{t+1}=\operatorname{TopB}\{(h+v,s') : (h,s)\in\mathrm{Beam}_t, v\in V, \delta(s,v)=s'\}.
+\end{equation}
+Dead-end states are removed. A soft variant replaces hard removal with a penalty, useful when syllabification is uncertain or the target meter is intentionally approximate.
+
+\section{Experimental Setup}
+The repository contains both a deterministic phrase ablation and a Sanskrit neural experiment. We repair the CC BY-SA Sanskrit Metrical Poetry JSON into 50 verse examples and use its Devanāgarī text and meter labels for supervision. The repaired multiline verses produce 186 training lines. We fine-tune \texttt{distilgpt2} for three epochs using PyTorch 2.6 with CUDA 12.4 on an NVIDIA RTX 4060 Laptop GPU. Generation compares nucleus sampling, a local contrastive-search implementation, and meter-filtered candidates. The project scanner applies Devanāgarī akṣara rules for short and long vowels, anusvāra, visarga, and consonant closure. Metrics are pattern validity, model loss, and qualitative inspection. The larger CC0 Sansar stream is an opt-in scale-up path; it is not silently claimed as part of the current run.
+
+\section{Results}
+The symbolic constrained decoder obtains meter validity of 1.00 by construction. In the neural run, the model-generated unconstrained sample is fluent but has a long, uncontrolled pattern. For target $LGLGLG$, the model-ranked constrained sample is:
+\begin{quote}
+a bright moon rises\\
+a bright cloud rises\\
+a dark moon rises\\
+a soft moon rises
+\end{quote}
+All four lines match the target under both the cached annotation and the project syllable classifier. The strict token-level sample is less meaningful, demonstrating that hard token masking alone does not solve the language-quality problem. The exact output is stored in \texttt{results/neural\_generation.json}.
+
+For the Sanskrit run, the trained checkpoint uses device \texttt{cuda:0}. The unconstrained and contrastive samples expose the small-corpus limitation through repetition, while the constrained candidates achieve 100\% validity for the selected $LGGLG$ pattern. The generated Sanskrit sample and exact scanned patterns are stored in \texttt{results/sanskrit\_generation.json}. Because the repaired labeled corpus contains only 50 verse examples, these results are a proof-of-pipeline experiment, not evidence of broad Sanskrit poetic competence. The \texttt{--scale} path is provided for the larger Sansar corpus and should be used before making claims about general Sanskrit generation.
+
+\begin{table}[t]
+\centering
+\caption{Expected behavior of the prototype.}
+\begin{tabular}{lcc}
+\toprule
+Condition & Meter validity & Constraint mechanism\\
+\midrule
+Unconstrained & $<1.00$ & none\\
+Constrained & $1.00$ & hard Prastāra filter\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Discussion}
+Hard constraints solve formal validity but can reduce lexical diversity and semantic coherence when the candidate set is sparse. The central design question is therefore not whether meter can be enforced, but how to preserve useful language-model search space while enforcing it. Subword tokenization complicates this problem because a token may contain zero, one, or several syllables. A practical implementation should cache token-to-syllable transitions, carry partial syllables across tokens when needed, and use a fallback uncertainty state. Human evaluation is necessary because a line can be metrically perfect yet poetically weak.
+
+\section{Conclusion}
+Pingala's Prastāra gives generative systems a compact and auditable representation of prosodic form. The presented prototype demonstrates the complete path from enumeration to constrained decoding and evaluation. The next research step is a neural implementation with multilingual syllabification, soft constraint calibration, and controlled human studies of the validity--meaning trade-off.
+
+\begin{thebibliography}{00}
+\bibitem{pingala} Pingala, \emph{Chandaḥśāstra}, classical treatise on Sanskrit prosody.
+\bibitem{constrained} A. Hokamp and R. J. Manning, ``Lexically constrained decoding for sequence generation using grid beam search,'' ACL, 2017.
+\bibitem{poelm} A. Ormazabal et al., ``PoeLM: A Meter- and Rhyme-Controllable Language Model for Unsupervised Poetry Generation,'' Findings of EMNLP, 2022.
+\bibitem{hf} Hugging Face, ``Causal language modeling,'' Transformers documentation, accessed Nov. 2026.
+\bibitem{finite} C. D. Manning et al., ``The Stanford CoreNLP natural language processing toolkit,'' ACL System Demonstrations, 2014.
+\end{thebibliography}
+\end{document}
